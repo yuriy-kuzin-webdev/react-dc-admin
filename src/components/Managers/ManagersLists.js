@@ -2,7 +2,7 @@ import React from "react";
 import Manager from "./Manager";
 import Table from "react-bootstrap/Table";
 
-export default function ManagersLists({ managers }) {
+export default function ManagersLists({ managers, onDelete, onEdit }) {
   return (
     <Table striped bordered hover>
       <thead>
@@ -16,7 +16,7 @@ export default function ManagersLists({ managers }) {
       </thead>
       <tbody>
         {managers.map((manager) => (
-          <Manager key={manager.id} manager={manager} />
+          <Manager key={manager.id} manager={manager} onDelete={onDelete} onEdit={onEdit}/>
         ))}
       </tbody>
     </Table>
