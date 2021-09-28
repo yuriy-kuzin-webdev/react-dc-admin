@@ -89,7 +89,7 @@ export function DcContextProvider(props) {
     }).then((response) => {
       setUserClinics((prev) => {
         return prev.map((c) => {
-          return c.id === clinic.id ? clinic : clinic;
+          return c.id === clinic.id ? clinic : c;
         });
       });
     });
