@@ -81,21 +81,49 @@ export function DcContextProvider(props) {
   }
 
   function addDentistHandler(dentist) {
-    //send request
-    //add response
-    setUserDentists((prev) => {
-      return prev.concat(dentist);
-    });
+    fetch(api + "dentists", {
+      method: "POST",
+      body: JSON.stringify(dentist),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((json) => {
+        setUserDentists((prev) => {
+          return prev.concat(json);
+        });
+      });
   }
   function updDentistHandler(dentist) {
-    //send request
-    //add response
+    fetch(api + "dentists/" + dentist.id, {
+      method: "PUT",
+      body: JSON.stringify(dentist),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((response) => {
+      setUserDentists((prev) => {
+        return prev.map((d) => {
+          return d.id === dentist.id ? dentist : d;
+        });
+      });
+    });
   }
   function delDentistHandler(dentistId) {
-    // send request
-    setUserDentists((prev) => {
-      return prev.filter((dentist) => dentist.id !== dentistId);
-    });
+    fetch(api + "dentists/" + dentistId, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((json) => {
+        setUserDentists((prev) => {
+          return prev.filter((dentist) => dentist.id !== dentistId);
+        });
+      });   
   }
 
   function addManagerHandler(manager) {
