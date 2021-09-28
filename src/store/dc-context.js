@@ -63,21 +63,49 @@ export function DcContextProvider(props) {
   }, []);
 
   function addClinicHandler(clinic) {
-    //send request
-    //add response
-    setUserClinics((prev) => {
-      return prev.concat(clinic);
-    });
+    fetch(api + "clinics", {
+      method: "POST",
+      body: JSON.stringify(clinic),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((json) => {
+        setUserClinics((prev) => {
+          return prev.concat(json);
+        });
+      });
   }
   function updClinicHandler(clinic) {
-    //send request
-    //add response
+    fetch(api + "clinics/" + clinic.id, {
+      method: "PUT",
+      body: JSON.stringify(clinic),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((response) => {
+      setUserClinics((prev) => {
+        return prev.map((c) => {
+          return c.id === clinic.id ? clinic : clinic;
+        });
+      });
+    });
   }
   function delClinicHandler(clinicId) {
-    //send request
-    setUserClinics((prev) => {
-      return prev.filter((clinic) => clinic.id !== clinicId);
-    });
+    fetch(api + "clinics/" + clinicId, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((json) => {
+        setUserClinics((prev) => {
+          return prev.filter((clinic) => clinic.id !== clinicId);
+        });
+      });
   }
 
   function addDentistHandler(dentist) {
@@ -123,7 +151,7 @@ export function DcContextProvider(props) {
         setUserDentists((prev) => {
           return prev.filter((dentist) => dentist.id !== dentistId);
         });
-      });   
+      });
   }
 
   function addManagerHandler(manager) {
