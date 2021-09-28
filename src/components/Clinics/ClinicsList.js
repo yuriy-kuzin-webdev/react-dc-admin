@@ -2,7 +2,7 @@ import React from "react";
 import Clinic from "./Clinic";
 import Table from "react-bootstrap/Table";
 
-export default function ClinicsList({ clinics }) {
+export default function ClinicsList({ clinics, onDelete, onEdit }) {
   return (
     <Table striped bordered hover>
       <thead>
@@ -17,7 +17,7 @@ export default function ClinicsList({ clinics }) {
       </thead>
       <tbody>
         {clinics.map((clinic) => (
-          <Clinic key={clinic.id} clinic={clinic} />
+          <Clinic key={clinic.id} clinic={clinic} onDelete={onDelete} onEdit={onEdit} />
         ))}
       </tbody>
     </Table>
