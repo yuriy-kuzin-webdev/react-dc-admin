@@ -93,6 +93,7 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
   const addressRef = useRef();
   const phoneRef = useRef();
   const imageRef = useRef();
+  const [imagePreview, setImagePreview] = useState((selected && selected.image)?selected.image:'')
 
   function handleCancelUserForm(e) {
     e.preventDefault();
@@ -113,6 +114,9 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
       data.id = selected.id;
     }
     handleSubmit.onSubmit(data);
+  }
+  function imagePreviewHandler(e) {
+    setImagePreview(e.target.value)
   }
   return (
     <Container className="d-flex align-items-center justify-content-center">
@@ -164,8 +168,9 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
                   required
                   ref={imageRef}
                   defaultValue={selected.image}
+                  onChange={imagePreviewHandler}
                 />
-                <Image src={selected && selected.image} fluid />
+                <Image className="mt-5" src={imagePreview} fluid />
               </Form.Group>
               <Button
                 className="w-100"
