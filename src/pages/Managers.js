@@ -98,7 +98,7 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
   function handleSubmitUserForm(e) {
     e.preventDefault();
     let data = {
-      clinicId: clinicIdRef.current.value,
+      clinicId: parseInt(clinicIdRef.current.value),
       username: usernameRef.current.value,
       password: passwordRef.current.value,
     };

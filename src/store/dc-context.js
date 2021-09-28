@@ -63,57 +63,85 @@ export function DcContextProvider(props) {
   }, []);
 
   function addClinicHandler(clinic) {
-      //send request
-      //add response
-      setUserClinics((prev)=>{
-          return prev.concat(clinic)
-      })
+    //send request
+    //add response
+    setUserClinics((prev) => {
+      return prev.concat(clinic);
+    });
   }
   function updClinicHandler(clinic) {
-      //send request
-      //add response
+    //send request
+    //add response
   }
   function delClinicHandler(clinicId) {
-      //send request
-      setUserClinics((prev)=>{
-          return prev.filter(clinic => clinic.id !== clinicId)
-      })
+    //send request
+    setUserClinics((prev) => {
+      return prev.filter((clinic) => clinic.id !== clinicId);
+    });
   }
 
   function addDentistHandler(dentist) {
-      //send request
-      //add response
-      setUserDentists((prev)=>{
-          return prev.concat(dentist)
-      })
+    //send request
+    //add response
+    setUserDentists((prev) => {
+      return prev.concat(dentist);
+    });
   }
   function updDentistHandler(dentist) {
-      //send request
-      //add response
+    //send request
+    //add response
   }
   function delDentistHandler(dentistId) {
-      // send request
-      setUserDentists((prev)=>{
-          return prev.filter(dentist => dentist.id !== dentistId)
-      })
+    // send request
+    setUserDentists((prev) => {
+      return prev.filter((dentist) => dentist.id !== dentistId);
+    });
   }
 
   function addManagerHandler(manager) {
-      //send request
-      //add response
-      setUserManagers((prev)=>{
-          return prev.concat(manager)
+    fetch(api + "managers", {
+      method: "POST",
+      body: JSON.stringify(manager),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        return response.json();
       })
+      .then((json) => {
+        setUserManagers((prev) => {
+          return prev.concat(json);
+        });
+      });
   }
   function updManagerHandler(manager) {
-      //send request
-      //add response
+    fetch(api + "managers/" + manager.id, {
+      method: "PUT",
+      body: JSON.stringify(manager),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((response) => {
+      setUserManagers((prev) => {
+        return prev.map((m) => {
+          return m.id === manager.id ? manager : m;
+        });
+      });
+    });
   }
   function delManagerHandler(managerId) {
-      // send request
-      setUserManagers((prev)=>{
-          return prev.filter(manager => manager.id !== managerId)
+    fetch(api + "managers/" + managerId, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        return response.json();
       })
+      .then((json) => {
+        setUserManagers((prev) => {
+          return prev.filter((manager) => manager.id !== managerId);
+        });
+      });
   }
 
   const context = {
