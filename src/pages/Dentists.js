@@ -1,6 +1,6 @@
 import React, { useContext, useState, useRef } from "react";
 import DcContext from "../store/dc-context";
-import DentistsList from '../components/Dentists/DentistsList'
+import DentistsList from "../components/Dentists/DentistsList";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Card from "react-bootstrap/Card";
@@ -62,6 +62,12 @@ export default function Dentists() {
       handleCancel={handleCancel}
       handleSubmit={submitHandle}
       formText={formText}
+      clinics={context.clinics.map((c) => {
+        return {
+          clinicId: c.id,
+          clinicName: c.title,
+        };
+      })}
     />
   ) : (
     <section>
@@ -71,7 +77,7 @@ export default function Dentists() {
           Add new dentist
         </Button>
       </div>
-      <DentistsList 
+      <DentistsList
         dentists={context.dentists}
         onDelete={handleModalShow}
         onEdit={handleFormEdit}
@@ -86,11 +92,24 @@ export default function Dentists() {
   );
 }
 
-function UserForm({ selected, handleCancel, handleSubmit, formText }) {
+function UserForm({ selected, handleCancel, handleSubmit, formText, clinics }) {
   const typeRef = useRef();
   const nameRef = useRef();
-  //const clinicNameRef = useRef();
+  const [clinic, setClinic] = useState(
+    selected && selected.clinicId && selected.clinicName
+      ? {
+          clinicId: selected.clinicId,
+          clinicName: selected.clinicName,
+        }
+      : {}
+  );
 
+  function handleClinicChange(e) {
+    const id = parseInt(e.target.value);
+    const selectedClinic = clinics.find((c) => c.clinicId === id);
+    console.log(selectedClinic);
+    setClinic(selectedClinic);
+  }
   function handleCancelUserForm(e) {
     e.preventDefault();
     handleCancel();
@@ -101,6 +120,10 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
       type: typeRef.current.value,
       name: nameRef.current.value,
     };
+    if (clinic && clinic.clinicId && clinic.clinicName) {
+      data.clinicId = clinic.clinicId;
+      data.clinicName = clinic.clinicName;
+    }
     if (selected) {
       data.id = selected.id;
     }
@@ -119,10 +142,12 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
                   type="text"
                   required
                   ref={typeRef}
-                  defaultValue={(selected && selected.type)?selected.type:'Dentist'}
+                  defaultValue={
+                    selected && selected.type ? selected.type : "Dentist"
+                  }
                 />
               </Form.Group>
-              <Form.Group id="name" className="mb-5">
+              <Form.Group id="name">
                 <Form.Label>Dentist Full Name</Form.Label>
                 <Form.Control
                   type="text"
@@ -130,6 +155,20 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
                   ref={nameRef}
                   defaultValue={selected.name}
                 />
+              </Form.Group>
+              <Form.Group id="clinic" className="mb-5">
+                <Form.Label>Clinic(optional)</Form.Label>
+                <Form.Select onChange={handleClinicChange}
+                value={(clinic && clinic.clinicId) && clinic.clinicId}>
+                  <option>Not selected</option>
+                  {clinics.map((c) => {
+                    return (
+                      <option key={c.clinicId} value={c.clinicId}>
+                        {c.clinicName}
+                      </option>
+                    );
+                  })}
+                </Form.Select>
               </Form.Group>
               <Button
                 className="w-100"
