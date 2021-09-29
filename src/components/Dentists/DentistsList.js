@@ -2,7 +2,7 @@ import React from "react";
 import Dentist from "./Dentist";
 import Table from "react-bootstrap/Table";
 
-export default function DentistsList({ dentists }) {
+export default function DentistsList({ dentists, onDelete, onEdit }) {
   return (
     <Table striped bordered hover>
       <thead>
@@ -17,7 +17,7 @@ export default function DentistsList({ dentists }) {
       </thead>
       <tbody>
         {dentists.map((dentist) => (
-          <Dentist key={dentist.id} dentist={dentist} />
+          <Dentist key={dentist.id} dentist={dentist} onDelete={onDelete} onEdit={onEdit} />
         ))}
       </tbody>
     </Table>
