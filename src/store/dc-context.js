@@ -1,117 +1,96 @@
 import { createContext, useEffect, useState } from "react";
 
 const DcContext = createContext({
+  language: 0,
+
   appointments: [],
   clients: [],
   clinics: [],
+  clinicInformations: [],
+  clinicReviews: [],
   dentists: [],
+  dentistInformations: [],
+  dentistReviews: [],
   managers: [],
+
+  changeLanguage: (code) => {},
+
+  addAppointment: (appointment) => {},
+  updAppointment: (appointment) => {},
+  delAppointment: (appointmentId) => {},
+
+  addClient: (client) => {},
+  updClient: (client) => {},
+  delClient: (clientId) => {},
+
+  addClinic: (clinic) => {},
+  updClinic: (clinic) => {},
+  delClinic: (clinicId) => {},
+
+  addClinicInformation: (clinicInfo) => {},
+  updClinicInformation: (clinicInfo) => {},
+  delClinicInformation: (clinicInfoId) => {},
+
+  addClinicReview: (clinicReview) => {},
+  updClinicReview: (clinicReview) => {},
+  delClinicReview: (clinicReviewId) => {},
 
   addDentist: (dentist) => {},
   updDentist: (dentist) => {},
   delDentist: (dentistId) => {},
 
+  addDentistInformation: (dentistInformation) => {},
+  updDentistInformation: (dentistInformation) => {},
+  delDentistInformation: (dentistInformationId) => {},
+
+  addDentistReview: (dentistReview) => {},
+  updDentistReview: (dentistReview) => {},
+  delDentistReview: (dentistReviewId) => {},
+
   addManager: (manager) => {},
   updManager: (manager) => {},
   delManager: (managerId) => {},
-
-  addClinic: (clinic) => {},
-  updClinic: (clinic) => {},
-  delClinic: (clinicId) => {},
 });
 
 export function DcContextProvider(props) {
-  const api = "https://localhost:44328/api/";
+  const api = "https://localhost:31437/api/";
 
+  const [userLanguage, setUserLanguage] = useState(0);
   const [userAppointments, setUserAppointments] = useState([]);
   const [userClients, setUserClients] = useState([]);
   const [userClinics, setUserClinics] = useState([]);
+  const [userClinicInformations, setUserClinicInformations] = useState([]);
+  const [userClinicReviews, setUserClinicReviews] = useState([]);
   const [userDentists, setUserDentists] = useState([]);
+  const [userDentistInformations, setUserDentistInformations] = useState([]);
+  const [userDentistReviews, setUserDentistReviews] = useState([]);
   const [userManagers, setUserManagers] = useState([]);
 
   useEffect(() => {
-    async function fetchClinics() {
-      let clinics = await fetch(api + "clinics");
-      clinics = await clinics.json();
-      setUserClinics(clinics);
+    async function fetchData(setStateCallback, controllerName) {
+      let response = await fetch(api + controllerName);
+      data = await response.json();
+      setStateCallback(data);
     }
-    async function fetchClients() {
-      let clients = await fetch(api + "clients");
-      clients = await clients.json();
-      setUserClients(clients);
-    }
-    async function fetchAppointments() {
-      let appointments = await fetch(api + "appointments");
-      appointments = await appointments.json();
-      setUserAppointments(appointments);
-    }
-    async function fetchDentists() {
-      let dentists = await fetch(api + "dentists");
-      dentists = await dentists.json();
-      setUserDentists(dentists);
-    }
-    async function fetchManagers() {
-      let managers = await fetch(api + "managers");
-      managers = await managers.json();
-      setUserManagers(managers);
-    }
-    fetchAppointments();
-    fetchClients();
-    fetchClinics();
-    fetchDentists();
-    fetchManagers();
+    fetchData(setUserAppointments, "appointments");
+    fetchData(setUserClients, "clients");
+    fetchData(setUserClinics, "clinics");
+    fetchData(setUserClinicInformations, "clinicinfoes");
+    fetchData(setUserClinicReviews, "clinicreviews");
+    fetchData(setUserDentists, "dentists");
+    fetchData(setUserDentistInformations, "dentistinfoes");
+    fetchData(setUserDentistReviews, "dentistreviews");
+    fetchData(setUserManagers, "managers");
   }, []);
 
-  function addClinicHandler(clinic) {
-    fetch(api + "clinics", {
-      method: "POST",
-      body: JSON.stringify(clinic),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((json) => {
-        setUserClinics((prev) => {
-          return prev.concat(json);
-        });
-      });
-  }
-  function updClinicHandler(clinic) {
-    fetch(api + "clinics/" + clinic.id, {
-      method: "PUT",
-      body: JSON.stringify(clinic),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).then((response) => {
-      setUserClinics((prev) => {
-        return prev.map((c) => {
-          return c.id === clinic.id ? clinic : c;
-        });
-      });
-    });
-  }
-  function delClinicHandler(clinicId) {
-    fetch(api + "clinics/" + clinicId, {
-      method: "DELETE",
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((json) => {
-        setUserClinics((prev) => {
-          return prev.filter((clinic) => clinic.id !== clinicId);
-        });
-      });
+  function changeLanguageHandler(code) {
+    setUserLanguage(code);
   }
 
-  function addDentistHandler(dentist) {
-    fetch(api + "dentists", {
+  function addData(data, controllerName, setStateCallback) {
+    fetch(api + controllerName, {
       method: "POST",
-      body: JSON.stringify(dentist),
+      body: JSON.stringify(data),
       headers: {
         "Content-Type": "application/json",
       },
@@ -120,104 +99,89 @@ export function DcContextProvider(props) {
         return response.json();
       })
       .then((json) => {
-        setUserDentists((prev) => {
+        setStateCallback((prev) => {
           return prev.concat(json);
         });
       });
   }
-  function updDentistHandler(dentist) {
-    fetch(api + "dentists/" + dentist.id, {
+  function updData(data, dataId, controllerName, setStateCallback) {
+    fetch(api + controllerName + "/" + dataId, {
       method: "PUT",
-      body: JSON.stringify(dentist),
+      body: JSON.stringify(data),
       headers: {
         "Content-Type": "application/json",
       },
     }).then((response) => {
-      setUserDentists((prev) => {
+      setStateCallback((prev) => {
         return prev.map((d) => {
-          return d.id === dentist.id ? dentist : d;
+          return d[Object.keys(d)[0]] === dataId ? data : d;
         });
       });
     });
   }
-  function delDentistHandler(dentistId) {
-    fetch(api + "dentists/" + dentistId, {
+  function delData(dataId, controllerName, setStateCallback) {
+    fetch(api + controllerName + "/" + dataId, {
       method: "DELETE",
     })
       .then((response) => {
         return response.json();
       })
       .then((json) => {
-        setUserDentists((prev) => {
-          return prev.filter((dentist) => dentist.id !== dentistId);
-        });
-      });
-  }
-
-  function addManagerHandler(manager) {
-    fetch(api + "managers", {
-      method: "POST",
-      body: JSON.stringify(manager),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((json) => {
-        setUserManagers((prev) => {
-          return prev.concat(json);
-        });
-      });
-  }
-  function updManagerHandler(manager) {
-    fetch(api + "managers/" + manager.id, {
-      method: "PUT",
-      body: JSON.stringify(manager),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).then((response) => {
-      setUserManagers((prev) => {
-        return prev.map((m) => {
-          return m.id === manager.id ? manager : m;
-        });
-      });
-    });
-  }
-  function delManagerHandler(managerId) {
-    fetch(api + "managers/" + managerId, {
-      method: "DELETE",
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((json) => {
-        setUserManagers((prev) => {
-          return prev.filter((manager) => manager.id !== managerId);
+        setStateCallback((prev) => {
+          return prev.filter((data) => data[Object.keys(data)[0]] !== dataId);
         });
       });
   }
 
   const context = {
+    language: userLanguage,
     appointments: userAppointments,
     clients: userClients,
     clinics: userClinics,
+    clinicInformations: userClinicInformations,
+    clinicReviews: userClinicReviews,
     dentists: userDentists,
+    dentistInformations: userDentistInformations,
+    dentistReviews: userDentistReviews,
     managers: userManagers,
 
-    addDentist: addDentistHandler,
-    updDentist: updDentistHandler,
-    delDentist: delDentistHandler,
+    changeLanguage: changeLanguageHandler,
 
-    addManager: addManagerHandler,
-    updManager: updManagerHandler,
-    delManager: delManagerHandler,
+    addAppointment: (appointment) => { addData(appointment, "appointments", setUserAppointments) },
+    updAppointment: (appointment) => { updData(appointment, appointment.id, "appointments", setUserAppointments) },
+    delAppointment: (appointmentId) => { delData(appointmentId, "appointments", setUserAppointments) },
 
-    addClinic: addClinicHandler,
-    updClinic: updClinicHandler,
-    delClinic: delClinicHandler,
+    addClient: (client) => { addData(client, "clients", setUserClients) },
+    updClient: (client) => { updData(client, client.id, "clients", setUserClients) },
+    delClient: (clientId) => { delData(clientId, "clients", setUserClients) },
+
+    addClinic: (clinic) => { addData(clinic, "clinics", setUserClinics) },
+    updClinic: (clinic) => { updData(clinic, clinic.id, "clinics", setUserClinics) },
+    delClinic: (clinicId) => { delData(clinicId, "clinics", setUserClinics) },
+
+    addClinicInformation: (clinicInfo) => { addData(clinicInfo, "clinicinfoes", setUserClinicInformations) },
+    updClinicInformation: (clinicInfo) => { updData(clinicInfo, clinicInfo.clinicId, "clinicinfoes", setUserClinicInformations) },
+    delClinicInformation: (clinicInfoId) => { delData(clinicInfoId, "clinicinfoes", setUserClinicInformations) },
+
+    addClinicReview: (clinicReview) => { addData(clinicReview, "clinicreviews", setUserClinicReviews) },
+    updClinicReview: (clinicReview) => { updData(clinicReview, clinicReview.id ,"clinicreviews", setUserClinicReviews) },
+    delClinicReview: (clinicReviewId) => { delData(clinicReviewId, "clinicreviews", setUserClinicReviews) },
+
+    addDentist: (dentist) => { addData(dentist, "dentists", setUserDentists) },
+    updDentist: (dentist) => { updData(dentist, dentist.id, "dentists", setUserDentists) },
+    delDentist: (dentistId) => { delData(dentistId, "dentists", setUserDentists) },
+
+    addDentistInformation: (dentistInformation) => { addData(dentistInformation, "dentistinfoes", setUserDentistInformations) },
+    updDentistInformation: (dentistInformation) => { updData(dentistInformation, dentistInformation.dentistId, "dentistinfoes", setUserDentistInformations) },
+    delDentistInformation: (dentistInformationId) => { delData(dentistInformationId, "dentistinfoes", setUserDentistInformations) },
+
+    addDentistReview: (dentistReview) => { addData(dentistReview, "dentistreviews", setUserDentistReviews) },
+    updDentistReview: (dentistReview) => { updData(dentistReview, dentistReview.id, "dentistreviews", setUserDentistReviews) },
+    delDentistReview: (dentistReviewId) => { delData(dentistReviewId, "dentistreviews", setUserDentistReviews) },
+
+    addManager: (manager) => { addData(manager, "managers", setUserManagers) },
+    updManager: (manager) => { updData(manager, manager.id, "managers", setUserManagers) },
+    delManager: (managerId) => { delData(managerId, "managers", setUserManagers) },
   };
 
   return (
