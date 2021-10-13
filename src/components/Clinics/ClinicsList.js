@@ -9,7 +9,6 @@ export default function ClinicsList({ clinics, onDelete, onEdit }) {
         <tr>
           <th>#</th>
           <th>Title</th>
-          <th>District</th>
           <th>Address</th>
           <th>Phone</th>
           <th>Actions</th>

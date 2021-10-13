@@ -29,6 +29,7 @@ export default function Clinics() {
   function handleDelete() {
     const id = selected.id;
     handleCancel();
+    context.delClinicInformation(id);
     context.delClinic(id);
   }
   function handleModalShow(clinic) {
@@ -89,8 +90,13 @@ export default function Clinics() {
 
 function UserForm({ selected, handleCancel, handleSubmit, formText }) {
   const titleRef = useRef();
-  const districtRef = useRef();
+  const titleRuRef = useRef();
+  const titleUaRef = useRef();
+
   const addressRef = useRef();
+  const addressRuRef = useRef();
+  const addressUaRef = useRef();
+
   const phoneRef = useRef();
   const imageRef = useRef();
   const [imagePreview, setImagePreview] = useState((selected && selected.image)?selected.image:'')
@@ -103,8 +109,11 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
     e.preventDefault();
     let data = {
       title: titleRef.current.value,
-      district: districtRef.current.value,
+      titleRu: titleRuRef.current.value,
+      titleUa: titleUaRef.current.value,
       address: addressRef.current.value,
+      addressRu: addressRuRef.current.value,
+      addressUa: addressUaRef.current.value,
       phone: phoneRef.current.value
     };
     if (imageRef.current.value && imageRef.current.value !== "") {
@@ -134,13 +143,22 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
                   defaultValue={selected.title}
                 />
               </Form.Group>
-              <Form.Group id="district">
-                <Form.Label>District</Form.Label>
+              <Form.Group id="titleRu">
+                <Form.Label>Title Ru</Form.Label>
                 <Form.Control
                   type="text"
                   required
-                  ref={districtRef}
-                  defaultValue={selected.district}
+                  ref={titleRuRef}
+                  defaultValue={selected.titleRu}
+                />
+              </Form.Group>
+              <Form.Group id="titleUa">
+                <Form.Label>Title Ua</Form.Label>
+                <Form.Control
+                  type="text"
+                  required
+                  ref={titleUaRef}
+                  defaultValue={selected.titleUa}
                 />
               </Form.Group>
               <Form.Group id="address">
@@ -152,6 +170,25 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
                   defaultValue={selected.address}
                 />
               </Form.Group>
+              <Form.Group id="addressRu">
+                <Form.Label>Address Ru</Form.Label>
+                <Form.Control
+                  type="text"
+                  required
+                  ref={addressRuRef}
+                  defaultValue={selected.addressRu}
+                />
+              </Form.Group>
+              <Form.Group id="addressUa">
+                <Form.Label>Address Ua</Form.Label>
+                <Form.Control
+                  type="text"
+                  required
+                  ref={addressUaRef}
+                  defaultValue={selected.addressUa}
+                />
+              </Form.Group>
+             
               <Form.Group id="phone">
                 <Form.Label>Phone</Form.Label>
                 <Form.Control
