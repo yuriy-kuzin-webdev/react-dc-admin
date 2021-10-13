@@ -53,7 +53,7 @@ const DcContext = createContext({
 });
 
 export function DcContextProvider(props) {
-  const api = "https://localhost:31437/api/";
+  const api = "http://localhost:31437/api/";
 
   const [userLanguage, setUserLanguage] = useState(0);
   const [userAppointments, setUserAppointments] = useState([]);
@@ -69,7 +69,7 @@ export function DcContextProvider(props) {
   useEffect(() => {
     async function fetchData(setStateCallback, controllerName) {
       let response = await fetch(api + controllerName);
-      data = await response.json();
+      let data = await response.json();
       setStateCallback(data);
     }
     fetchData(setUserAppointments, "appointments");
