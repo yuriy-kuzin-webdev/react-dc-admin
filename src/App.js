@@ -5,6 +5,7 @@ import Clinics from './pages/Clinics';
 import Dentists from './pages/Dentists';
 import Managers from './pages/Managers';
 import Layout from "./components/Layout/Layout";
+import ClinicInformations from "./pages/ClinicInformations";
 
 
 function App() {
@@ -19,6 +20,9 @@ function App() {
         </Route>
         <Route path="/clinics">
           <Clinics/>
+        </Route>
+        <Route path="/clinic-informations">
+          <ClinicInformations/>
         </Route>
         <Route path="/dentists">
           <Dentists/>
