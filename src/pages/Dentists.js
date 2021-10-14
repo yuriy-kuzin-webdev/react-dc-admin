@@ -5,6 +5,7 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Card from "react-bootstrap/Card";
 import Container from "react-bootstrap/Container";
+import Image from "react-bootstrap/Image"
 
 import Modal from "../components/Modal";
 import Backdrop from "../components/Backdrop";
@@ -93,8 +94,12 @@ export default function Dentists() {
 }
 
 function UserForm({ selected, handleCancel, handleSubmit, formText, clinics }) {
-  const typeRef = useRef();
+  const [type, setType] = useState((selected && selected.type)? selected.type:1);
   const nameRef = useRef();
+  const nameRuRef = useRef();
+  const nameUaRef = useRef();
+  const imageRef = useRef();
+  const [imagePreview, setImagePreview] = useState((selected && selected.image)?selected.image:'');
   const [clinic, setClinic] = useState(
     selected && selected.clinicId && selected.clinicName
       ? {
@@ -103,7 +108,13 @@ function UserForm({ selected, handleCancel, handleSubmit, formText, clinics }) {
         }
       : {}
   );
-
+  function imagePreviewHandler(e) {
+    setImagePreview(e.target.value)
+  }
+  function handleRadioChange(e) {
+    e.persist();
+    setType(parseInt(e.target.value));
+  }
   function handleClinicChange(e) {
     const id = parseInt(e.target.value);
     const selectedClinic = clinics.find((c) => c.clinicId === id);
@@ -117,12 +128,16 @@ function UserForm({ selected, handleCancel, handleSubmit, formText, clinics }) {
   function handleSubmitUserForm(e) {
     e.preventDefault();
     let data = {
-      type: typeRef.current.value,
+      type: type,
       name: nameRef.current.value,
+      nameRu: nameRuRef.current.value,
+      nameUa: nameUaRef.current.value,
     };
     if (clinic && clinic.clinicId && clinic.clinicName) {
       data.clinicId = clinic.clinicId;
-      data.clinicName = clinic.clinicName;
+    }
+    if (imageRef.current.value && imageRef.current.value !== "") {
+      data.image = imageRef.current.value
     }
     if (selected) {
       data.id = selected.id;
@@ -136,17 +151,6 @@ function UserForm({ selected, handleCancel, handleSubmit, formText, clinics }) {
           <Card.Body>
             <h2 className="text-center mb-4">{formText}</h2>
             <Form>
-              <Form.Group id="type">
-                <Form.Label>Type</Form.Label>
-                <Form.Control
-                  type="text"
-                  required
-                  ref={typeRef}
-                  defaultValue={
-                    selected && selected.type ? selected.type : "Dentist"
-                  }
-                />
-              </Form.Group>
               <Form.Group id="name">
                 <Form.Label>Dentist Full Name</Form.Label>
                 <Form.Control
@@ -155,6 +159,28 @@ function UserForm({ selected, handleCancel, handleSubmit, formText, clinics }) {
                   ref={nameRef}
                   defaultValue={selected.name}
                 />
+              </Form.Group>
+              <Form.Group id="nameRu">
+                <Form.Label>Dentist Full Name Ru</Form.Label>
+                <Form.Control
+                  type="text"
+                  required
+                  ref={nameRuRef}
+                  defaultValue={selected.nameRu}
+                />
+              </Form.Group>
+              <Form.Group id="nameUa">
+                <Form.Label>Dentist Full Name Ua</Form.Label>
+                <Form.Control
+                  type="text"
+                  required
+                  ref={nameUaRef}
+                  defaultValue={selected.nameUa}
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Check name="type" type="radio" label="Dentist" value={1} checked={type === 1} onChange={handleRadioChange} inline/>
+                <Form.Check name="type" type="radio" label="Surgeon" value={2} checked={type === 2} onChange={handleRadioChange} inline/>
               </Form.Group>
               <Form.Group id="clinic" className="mb-5">
                 <Form.Label>Clinic(optional)</Form.Label>
@@ -169,6 +195,17 @@ function UserForm({ selected, handleCancel, handleSubmit, formText, clinics }) {
                     );
                   })}
                 </Form.Select>
+              </Form.Group>
+              <Form.Group id="image" className="mb-5">
+                <Form.Label>Image url</Form.Label>
+                <Form.Control
+                  type="text"
+                  required
+                  ref={imageRef}
+                  defaultValue={selected.image}
+                  onChange={imagePreviewHandler}
+                />
+                <Image className="mt-5" src={imagePreview} fluid />
               </Form.Group>
               <Button
                 className="w-100"

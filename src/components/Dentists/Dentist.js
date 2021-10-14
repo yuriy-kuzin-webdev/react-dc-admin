@@ -2,6 +2,8 @@ import React from "react";
 import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 
+const type = ['', 'dentist', 'surgeon'];
+
 export default function Dentist({ dentist, onDelete, onEdit }) {
   function handleDelete(e){
     onDelete(dentist)
@@ -14,10 +16,9 @@ export default function Dentist({ dentist, onDelete, onEdit }) {
   return (
     <tr>
       <td>{dentist.id}</td>
-      <td>{dentist.type}</td>
+      <td>{type[dentist.type]}</td>
       <td>{dentist.name}</td>
       <td>{dentist.clinicId}</td>
-      <td>{dentist.clinicName}</td>
       <td width="10%">
         <ButtonGroup>
           <Button variant="info" onClick={handleEdit}>
