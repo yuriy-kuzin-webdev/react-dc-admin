@@ -20,6 +20,9 @@ export default function MainNavigation() {
             <Link to="/dentists">Dentists</Link>
           </li>
           <li>
+            <Link to="/dentist-informations">Dentist info</Link>
+          </li>
+          <li>
             <Link to="/appointments">Appointments</Link>
           </li>
           <li>
