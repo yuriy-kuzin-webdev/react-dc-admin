@@ -17,10 +17,16 @@ export default function MainNavigation() {
             <Link to="/clinic-informations">Clinic info</Link>
           </li>
           <li>
+            <Link to="/clinics-reviews">Clinics Reviews</Link>
+          </li>
+          <li>
             <Link to="/dentists">Dentists</Link>
           </li>
           <li>
             <Link to="/dentist-informations">Dentist info</Link>
+          </li>
+          <li>
+            <Link to="/dentists-reviews">Dentists Reviews</Link>
           </li>
           <li>
             <Link to="/appointments">Appointments</Link>
