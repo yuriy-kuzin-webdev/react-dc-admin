@@ -15,7 +15,6 @@ export default function Clinic({ clinic, onDelete, onEdit }) {
     <tr>
       <td>{clinic.id}</td>
       <td>{clinic.title}</td>
-      <td>{clinic.district}</td>
       <td>{clinic.address}</td>
       <td>{clinic.phone}</td>
       <td width="10%">

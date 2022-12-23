@@ -1,16 +1,15 @@
 import React, { useContext, useState, useRef } from "react";
 import DcContext from "../store/dc-context";
-import DentistsList from "../components/Dentists/DentistsList";
+import ClinicReviewList from "../components/ClinicsReviews/ClinicReviewList";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Card from "react-bootstrap/Card";
 import Container from "react-bootstrap/Container";
-import Image from "react-bootstrap/Image"
 
 import Modal from "../components/Modal";
 import Backdrop from "../components/Backdrop";
 
-export default function Dentists() {
+export default function ClinicsReviews() {
   const context = useContext(DcContext);
   const [isModalActive, setIsModalActive] = useState(false);
   const [isFormActive, setIsFormActive] = useState(false);
@@ -18,21 +17,21 @@ export default function Dentists() {
   const [submitHandle, setSubmitHandle] = useState({ onSubmit: () => {} });
   const [selected, setSelected] = useState({});
 
-  function handleCreate(dentist) {
-    context.addDentist(dentist);
+  function handleCreate(review) {
+    context.addClinicReview(review);
     handleCancel();
   }
-  function handleUpdate(dentist) {
-    context.updDentist(dentist);
+  function handleUpdate(review) {
+    context.updClinicReview(review);
     handleCancel();
   }
   function handleDelete() {
     const id = selected.id;
     handleCancel();
-    context.delDentist(id);
+    context.delClinicReview(id);
   }
-  function handleModalShow(dentist) {
-    setSelected(dentist);
+  function handleModalShow(review) {
+    setSelected(review);
     setIsModalActive(true);
   }
   function handleCancel() {
@@ -40,16 +39,16 @@ export default function Dentists() {
     setIsModalActive(false);
     setIsFormActive(false);
   }
-  function handleFormEdit(dentist) {
-    setFormText("Edit dentist");
-    setSelected(dentist);
+  function handleFormEdit(review) {
+    setFormText("Edit review");
+    setSelected(review);
     setSubmitHandle({
       onSubmit: handleUpdate,
     });
     setIsFormActive(true);
   }
   function handleFormCreate() {
-    setFormText("Add new dentist");
+    setFormText("Add new review");
     setSelected({});
     setSubmitHandle({
       onSubmit: handleCreate,
@@ -69,17 +68,23 @@ export default function Dentists() {
           clinicName: c.title,
         };
       })}
+      clients={context.clients.map((c) => {
+        return {
+          clientId: c.id,
+          clientName: c.name,
+        };
+      })}
     />
   ) : (
     <section>
-      <h1>Dentists page</h1>
+      <h1>Clinic reviews page</h1>
       <div className="mb-3 mt-5">
         <Button variant="primary" onClick={handleFormCreate}>
-          Add new dentist
+          Add new clinic review
         </Button>
       </div>
-      <DentistsList
-        dentists={context.dentists}
+      <ClinicReviewList
+        reviews={context.clinicReviews}
         onDelete={handleModalShow}
         onEdit={handleFormEdit}
       />
@@ -93,33 +98,44 @@ export default function Dentists() {
   );
 }
 
-function UserForm({ selected, handleCancel, handleSubmit, formText, clinics }) {
-  const [type, setType] = useState((selected && selected.type)? selected.type:1);
-  const nameRef = useRef();
-  const nameRuRef = useRef();
-  const nameUaRef = useRef();
-  const imageRef = useRef();
-  const [imagePreview, setImagePreview] = useState((selected && selected.image)?selected.image:'');
+function UserForm({
+  selected,
+  handleCancel,
+  handleSubmit,
+  formText,
+  clinics,
+  clients,
+}) {
+  const rateRef = useRef();
+  const messageRef = useRef();
   const [clinic, setClinic] = useState(
-    selected && selected.clinicId && selected.clinicName
+    selected && selected.clinicId
       ? {
           clinicId: selected.clinicId,
-          clinicName: selected.clinicName,
+          clinicName: clinics.find((c) => c.clinicId === selected.clinicId)
+            .title,
         }
       : {}
   );
-  function imagePreviewHandler(e) {
-    setImagePreview(e.target.value)
-  }
-  function handleRadioChange(e) {
-    e.persist();
-    setType(parseInt(e.target.value));
-  }
+  const [client, setClient] = useState(
+    selected && selected.clientId
+      ? {
+          clientId: selected.clientId,
+          clientName: clients.find((c) => c.clientId === selected.clientId)
+            .name,
+        }
+      : {}
+  );
+
   function handleClinicChange(e) {
     const id = parseInt(e.target.value);
     const selectedClinic = clinics.find((c) => c.clinicId === id);
-    console.log(selectedClinic);
     setClinic(selectedClinic);
+  }
+  function handleClientChange(e) {
+    const id = parseInt(e.target.value);
+    const selectedClient = clients.find((c) => c.clientId === id);
+    setClient(selectedClient);
   }
   function handleCancelUserForm(e) {
     e.preventDefault();
@@ -128,18 +144,20 @@ function UserForm({ selected, handleCancel, handleSubmit, formText, clinics }) {
   function handleSubmitUserForm(e) {
     e.preventDefault();
     let data = {
-      type: type,
-      name: nameRef.current.value,
-      nameRu: nameRuRef.current.value,
-      nameUa: nameUaRef.current.value,
+      rate: parseInt(rateRef.current.value),
+      message: messageRef.current.value,
     };
     if (clinic && clinic.clinicId && clinic.clinicName) {
       data.clinicId = clinic.clinicId;
+    } else if (selected) {
+      data.clinicId = selected.clinicId;
     }
-    if (imageRef.current.value && imageRef.current.value !== "") {
-      data.image = imageRef.current.value
+    if (client && client.clientId && client.clientName) {
+      data.clientId = client.clientId;
+    } else if (selected) {
+      data.clientId = selected.clientId;
     }
-    if (selected) {
+    if (selected && selected.id) {
       data.id = selected.id;
     }
     handleSubmit.onSubmit(data);
@@ -151,41 +169,31 @@ function UserForm({ selected, handleCancel, handleSubmit, formText, clinics }) {
           <Card.Body>
             <h2 className="text-center mb-4">{formText}</h2>
             <Form>
-              <Form.Group id="name">
-                <Form.Label>Dentist Full Name</Form.Label>
+              <Form.Group id="rate">
+                <Form.Label>Rate (1-5)</Form.Label>
                 <Form.Control
                   type="text"
                   required
-                  ref={nameRef}
-                  defaultValue={selected.name}
+                  ref={rateRef}
+                  defaultValue={selected.rate}
                 />
               </Form.Group>
-              <Form.Group id="nameRu">
-                <Form.Label>Dentist Full Name Ru</Form.Label>
+              <Form.Group id="message">
+                <Form.Label>Review text</Form.Label>
                 <Form.Control
-                  type="text"
+                  as="textarea"
+                  rows={3}
                   required
-                  ref={nameRuRef}
-                  defaultValue={selected.nameRu}
+                  ref={messageRef}
+                  defaultValue={selected.message}
                 />
-              </Form.Group>
-              <Form.Group id="nameUa">
-                <Form.Label>Dentist Full Name Ua</Form.Label>
-                <Form.Control
-                  type="text"
-                  required
-                  ref={nameUaRef}
-                  defaultValue={selected.nameUa}
-                />
-              </Form.Group>
-              <Form.Group>
-                <Form.Check name="type" type="radio" label="Dentist" value={1} checked={type === 1} onChange={handleRadioChange} inline/>
-                <Form.Check name="type" type="radio" label="Surgeon" value={2} checked={type === 2} onChange={handleRadioChange} inline/>
               </Form.Group>
               <Form.Group id="clinic" className="mb-5">
-                <Form.Label>Clinic(optional)</Form.Label>
-                <Form.Select onChange={handleClinicChange}
-                value={(clinic && clinic.clinicId) && clinic.clinicId}>
+                <Form.Label>Clinic</Form.Label>
+                <Form.Select
+                  onChange={handleClinicChange}
+                  value={clinic && clinic.clinicId && clinic.clinicId}
+                >
                   <option>Not selected</option>
                   {clinics.map((c) => {
                     return (
@@ -196,16 +204,21 @@ function UserForm({ selected, handleCancel, handleSubmit, formText, clinics }) {
                   })}
                 </Form.Select>
               </Form.Group>
-              <Form.Group id="image" className="mb-5">
-                <Form.Label>Image url</Form.Label>
-                <Form.Control
-                  type="text"
-                  required
-                  ref={imageRef}
-                  defaultValue={selected.image}
-                  onChange={imagePreviewHandler}
-                />
-                <Image className="mt-5" src={imagePreview} fluid />
+              <Form.Group id="client" className="mb-5">
+                <Form.Label>Client</Form.Label>
+                <Form.Select
+                  onChange={handleClientChange}
+                  value={client && client.clientId && client.clientId}
+                >
+                  <option>Not selected</option>
+                  {clients.map((c) => {
+                    return (
+                      <option key={c.clientId} value={c.clientId}>
+                        {c.clientName}
+                      </option>
+                    );
+                  })}
+                </Form.Select>
               </Form.Group>
               <Button
                 className="w-100"

@@ -1,6 +1,6 @@
 import React, { useContext, useState, useRef } from "react";
 import DcContext from "../store/dc-context";
-import AppointmentsList from "../components/Appointments/ApointmentsList";
+import ClinicInformationList from "../components/ClinicInformations/ClinicInformationList";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Card from "react-bootstrap/Card";
@@ -8,10 +8,8 @@ import Container from "react-bootstrap/Container";
 
 import Modal from "../components/Modal";
 import Backdrop from "../components/Backdrop";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css"
 
-export default function Appointments() {
+export default function ClinicInformations() {
   const context = useContext(DcContext);
   const [isModalActive, setIsModalActive] = useState(false);
   const [isFormActive, setIsFormActive] = useState(false);
@@ -19,21 +17,21 @@ export default function Appointments() {
   const [submitHandle, setSubmitHandle] = useState({ onSubmit: () => {} });
   const [selected, setSelected] = useState({});
 
-  function handleCreate(appointment) {
-    context.addAppointment(appointment);
+  function handleCreate(info) {
+    context.addClinicInformation(info);
     handleCancel();
   }
-  function handleUpdate(appointment) {
-    context.updAppointment(appointment);
+  function handleUpdate(info) {
+    context.updClinicInformation(info);
     handleCancel();
   }
   function handleDelete() {
-    const id = selected.id;
+    const id = selected.clinicId;
     handleCancel();
-    context.delAppointment(id);
+    context.delClinicInformation(id);
   }
-  function handleModalShow(appointment) {
-    setSelected(appointment);
+  function handleModalShow(info) {
+    setSelected(info);
     setIsModalActive(true);
   }
   function handleCancel() {
@@ -41,16 +39,16 @@ export default function Appointments() {
     setIsModalActive(false);
     setIsFormActive(false);
   }
-  function handleFormEdit(appointment) {
-    setFormText("Edit appointment");
-    setSelected(appointment);
+  function handleFormEdit(info) {
+    setFormText("Edit info");
+    setSelected(info);
     setSubmitHandle({
       onSubmit: handleUpdate,
     });
     setIsFormActive(true);
   }
   function handleFormCreate() {
-    setFormText("Add new appointment");
+    setFormText("Add new info");
     setSelected({});
     setSubmitHandle({
       onSubmit: handleCreate,
@@ -64,17 +62,23 @@ export default function Appointments() {
       handleCancel={handleCancel}
       handleSubmit={submitHandle}
       formText={formText}
+      clinics={context.clinics.map((c) => {
+        return {
+          clinicId: c.id,
+          clinicName: c.title,
+        };
+      })}
     />
   ) : (
     <section>
-      <h1>Appointments Informations page</h1>
+      <h1>Clinic Informations page</h1>
       <div className="mb-3 mt-5">
         <Button variant="primary" onClick={handleFormCreate}>
-          Add new appointment
+          Add new info
         </Button>
       </div>
-      <AppointmentsList
-        appointments={context.appointments}
+      <ClinicInformationList
+        informations={context.clinicInformations}
         onDelete={handleModalShow}
         onEdit={handleFormEdit}
       />
@@ -88,19 +92,25 @@ export default function Appointments() {
   );
 }
 
-function UserForm({ selected, handleCancel, handleSubmit, formText }) {
-  const statusRef = useRef();
-  const clientIdRef = useRef();
-  const clinicIdRef = useRef();
-  const dentistIdRef = useRef();
-  let initialDate = new Date();
-  initialDate.setHours(0,0,0,0);
-  const [selectedDate, setSelectedDate] = useState(initialDate);
+function UserForm({ selected, handleCancel, handleSubmit, formText, clinics }) {
+  const descriptionRef = useRef();
+  const descriptionRuRef = useRef();
+  const descriptionUaRef = useRef();
+  const [clinic, setClinic] = useState(
+    selected && selected.clinicId
+      ? {
+          clinicId: selected.clinicId,
+          clinicName: clinics.find(c => c.clinicId === selected.clinicId).title
+        }
+      : {}
+  );
 
-  function handleDateChange(date) {
-      setSelectedDate(date);
+  function handleClinicChange(e) {
+    const id = parseInt(e.target.value);
+    const selectedClinic = clinics.find((c) => c.clinicId === id);
+    console.log(selectedClinic);
+    setClinic(selectedClinic);
   }
-
   function handleCancelUserForm(e) {
     e.preventDefault();
     handleCancel();
@@ -108,14 +118,15 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
   function handleSubmitUserForm(e) {
     e.preventDefault();
     let data = {
-      dentistId: parseInt(dentistIdRef.current.value),
-      clinicId: parseInt(clinicIdRef.current.value),
-      date: selectedDate.toISOString(),
-      clientId: parseInt(clientIdRef.current.value),
-      status: parseInt(statusRef.current.value),
+      description: descriptionRef.current.value,
+      descriptionRu: descriptionRuRef.current.value,
+      descriptionUa: descriptionUaRef.current.value
     };
-    if (selected) {
-      data.id = selected.id;
+    if (clinic && clinic.clinicId && clinic.clinicName) {
+      data.clinicId = clinic.clinicId;
+    }
+    else if (selected) {
+      data.clinicId = selected.clinicId;
     }
     handleSubmit.onSubmit(data);
   }
@@ -126,45 +137,49 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
           <Card.Body>
             <h2 className="text-center mb-4">{formText}</h2>
             <Form>
-            <Form.Group id="dentistId">
-                <Form.Label>Dentist Id</Form.Label>
+              <Form.Group id="description">
+                <Form.Label>Description</Form.Label>
                 <Form.Control
-                  type="text"
+                  as="textarea"
+                  rows={3}
                   required
-                  ref={dentistIdRef}
-                  defaultValue={selected.dentistId}
+                  ref={descriptionRef}
+                  defaultValue={selected.description}
                 />
               </Form.Group>
-              <Form.Group id="clinicId">
-                <Form.Label>Clinic Id</Form.Label>
+              <Form.Group id="descriptionRu">
+                <Form.Label>Description Ru</Form.Label>
                 <Form.Control
-                  type="text"
+                  as="textarea"
+                  rows={3}
                   required
-                  ref={clinicIdRef}
-                  defaultValue={selected.clinicId}
+                  ref={descriptionRuRef}
+                  defaultValue={selected.descriptionRu}
                 />
               </Form.Group>
-              <Form.Group id="clientId">
-                <Form.Label>Client Id</Form.Label>
+              <Form.Group id="descriptionUa">
+                <Form.Label>Description Ua</Form.Label>
                 <Form.Control
-                  type="text"
+                  as="textarea"
+                  rows={3}
                   required
-                  ref={clientIdRef}
-                  defaultValue={selected.clientId}
+                  ref={descriptionUaRef}
+                  defaultValue={selected.descriptionUa}
                 />
               </Form.Group>
-              <Form.Group id="status">
-                <Form.Label>Status</Form.Label>
-                <Form.Control
-                  type="text"
-                  required
-                  ref={statusRef}
-                  defaultValue={selected.status}
-                />
-              </Form.Group>
-              <Form.Group id="date" className="mb-5">
-                <Form.Label>Date</Form.Label>
-                <DatePicker selected={selectedDate} onChange={handleDateChange}/>
+              <Form.Group id="clinic" className="mb-5">
+                <Form.Label>Clinic</Form.Label>
+                <Form.Select onChange={handleClinicChange}
+                value={(clinic && clinic.clinicId) && clinic.clinicId}>
+                  <option>Not selected</option>
+                  {clinics.map((c) => {
+                    return (
+                      <option key={c.clinicId} value={c.clinicId}>
+                        {c.clinicName}
+                      </option>
+                    );
+                  })}
+                </Form.Select>
               </Form.Group>
               <Button
                 className="w-100"

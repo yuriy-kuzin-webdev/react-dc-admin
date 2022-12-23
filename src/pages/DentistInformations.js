@@ -1,6 +1,6 @@
 import React, { useContext, useState, useRef } from "react";
 import DcContext from "../store/dc-context";
-import AppointmentsList from "../components/Appointments/ApointmentsList";
+import DentistInformationList from "../components/DentistInformations/DentistInformationList";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Card from "react-bootstrap/Card";
@@ -8,10 +8,8 @@ import Container from "react-bootstrap/Container";
 
 import Modal from "../components/Modal";
 import Backdrop from "../components/Backdrop";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css"
 
-export default function Appointments() {
+export default function DentistInformations() {
   const context = useContext(DcContext);
   const [isModalActive, setIsModalActive] = useState(false);
   const [isFormActive, setIsFormActive] = useState(false);
@@ -19,21 +17,21 @@ export default function Appointments() {
   const [submitHandle, setSubmitHandle] = useState({ onSubmit: () => {} });
   const [selected, setSelected] = useState({});
 
-  function handleCreate(appointment) {
-    context.addAppointment(appointment);
+  function handleCreate(info) {
+    context.addDentistInformation(info);
     handleCancel();
   }
-  function handleUpdate(appointment) {
-    context.updAppointment(appointment);
+  function handleUpdate(info) {
+    context.updDentistInformation(info);
     handleCancel();
   }
   function handleDelete() {
-    const id = selected.id;
+    const id = selected.dentistId;
     handleCancel();
-    context.delAppointment(id);
+    context.delDentistInformation(id);
   }
-  function handleModalShow(appointment) {
-    setSelected(appointment);
+  function handleModalShow(info) {
+    setSelected(info);
     setIsModalActive(true);
   }
   function handleCancel() {
@@ -41,16 +39,16 @@ export default function Appointments() {
     setIsModalActive(false);
     setIsFormActive(false);
   }
-  function handleFormEdit(appointment) {
-    setFormText("Edit appointment");
-    setSelected(appointment);
+  function handleFormEdit(info) {
+    setFormText("Edit info");
+    setSelected(info);
     setSubmitHandle({
       onSubmit: handleUpdate,
     });
     setIsFormActive(true);
   }
   function handleFormCreate() {
-    setFormText("Add new appointment");
+    setFormText("Add new info");
     setSelected({});
     setSubmitHandle({
       onSubmit: handleCreate,
@@ -64,17 +62,23 @@ export default function Appointments() {
       handleCancel={handleCancel}
       handleSubmit={submitHandle}
       formText={formText}
+      dentists={context.dentists.map((d) => {
+        return {
+          dentistId: d.id,
+          dentistName: d.name,
+        };
+      })}
     />
   ) : (
     <section>
-      <h1>Appointments Informations page</h1>
+      <h1>Dentist Informations page</h1>
       <div className="mb-3 mt-5">
         <Button variant="primary" onClick={handleFormCreate}>
-          Add new appointment
+          Add new info
         </Button>
       </div>
-      <AppointmentsList
-        appointments={context.appointments}
+      <DentistInformationList
+        informations={context.dentistInformations}
         onDelete={handleModalShow}
         onEdit={handleFormEdit}
       />
@@ -88,19 +92,25 @@ export default function Appointments() {
   );
 }
 
-function UserForm({ selected, handleCancel, handleSubmit, formText }) {
-  const statusRef = useRef();
-  const clientIdRef = useRef();
-  const clinicIdRef = useRef();
-  const dentistIdRef = useRef();
-  let initialDate = new Date();
-  initialDate.setHours(0,0,0,0);
-  const [selectedDate, setSelectedDate] = useState(initialDate);
+function UserForm({ selected, handleCancel, handleSubmit, formText, dentists }) {
+  const descriptionRef = useRef();
+  const descriptionRuRef = useRef();
+  const descriptionUaRef = useRef();
+  const [dentist, setDentist] = useState(
+    selected && selected.dentistId
+      ? {
+          dentistId: selected.dentistId,
+          dentistName: dentists.find(d => d.dentistId === selected.dentistId).name
+        }
+      : {}
+  );
 
-  function handleDateChange(date) {
-      setSelectedDate(date);
+  function handleDentistChange(e) {
+    const id = parseInt(e.target.value);
+    const selectedDentist = dentists.find((d) => d.dentistId === id);
+    console.log(selectedDentist);
+    setDentist(selectedDentist);
   }
-
   function handleCancelUserForm(e) {
     e.preventDefault();
     handleCancel();
@@ -108,14 +118,15 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
   function handleSubmitUserForm(e) {
     e.preventDefault();
     let data = {
-      dentistId: parseInt(dentistIdRef.current.value),
-      clinicId: parseInt(clinicIdRef.current.value),
-      date: selectedDate.toISOString(),
-      clientId: parseInt(clientIdRef.current.value),
-      status: parseInt(statusRef.current.value),
+      description: descriptionRef.current.value,
+      descriptionRu: descriptionRuRef.current.value,
+      descriptionUa: descriptionUaRef.current.value
     };
-    if (selected) {
-      data.id = selected.id;
+    if (dentist && dentist.dentistId && dentist.dentistName) {
+      data.dentistId = dentist.dentistId;
+    }
+    else if (selected) {
+      data.dentistId = selected.dentistId;
     }
     handleSubmit.onSubmit(data);
   }
@@ -126,45 +137,49 @@ function UserForm({ selected, handleCancel, handleSubmit, formText }) {
           <Card.Body>
             <h2 className="text-center mb-4">{formText}</h2>
             <Form>
-            <Form.Group id="dentistId">
-                <Form.Label>Dentist Id</Form.Label>
+              <Form.Group id="description">
+                <Form.Label>Description</Form.Label>
                 <Form.Control
-                  type="text"
+                  as="textarea"
+                  rows={3}
                   required
-                  ref={dentistIdRef}
-                  defaultValue={selected.dentistId}
+                  ref={descriptionRef}
+                  defaultValue={selected.description}
                 />
               </Form.Group>
-              <Form.Group id="clinicId">
-                <Form.Label>Clinic Id</Form.Label>
+              <Form.Group id="descriptionRu">
+                <Form.Label>Description Ru</Form.Label>
                 <Form.Control
-                  type="text"
+                  as="textarea"
+                  rows={3}
                   required
-                  ref={clinicIdRef}
-                  defaultValue={selected.clinicId}
+                  ref={descriptionRuRef}
+                  defaultValue={selected.descriptionRu}
                 />
               </Form.Group>
-              <Form.Group id="clientId">
-                <Form.Label>Client Id</Form.Label>
+              <Form.Group id="descriptionUa">
+                <Form.Label>Description Ua</Form.Label>
                 <Form.Control
-                  type="text"
+                  as="textarea"
+                  rows={3}
                   required
-                  ref={clientIdRef}
-                  defaultValue={selected.clientId}
+                  ref={descriptionUaRef}
+                  defaultValue={selected.descriptionUa}
                 />
               </Form.Group>
-              <Form.Group id="status">
-                <Form.Label>Status</Form.Label>
-                <Form.Control
-                  type="text"
-                  required
-                  ref={statusRef}
-                  defaultValue={selected.status}
-                />
-              </Form.Group>
-              <Form.Group id="date" className="mb-5">
-                <Form.Label>Date</Form.Label>
-                <DatePicker selected={selectedDate} onChange={handleDateChange}/>
+              <Form.Group id="dentist" className="mb-5">
+                <Form.Label>Dentist</Form.Label>
+                <Form.Select onChange={handleDentistChange}
+                value={(dentist && dentist.dentistId) && dentist.dentistId}>
+                  <option>Not selected</option>
+                  {dentists.map((d) => {
+                    return (
+                      <option key={d.dentistId} value={d.dentistId}>
+                        {d.dentistName}
+                      </option>
+                    );
+                  })}
+                </Form.Select>
               </Form.Group>
               <Button
                 className="w-100"

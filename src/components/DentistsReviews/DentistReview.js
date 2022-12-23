@@ -2,21 +2,22 @@ import React from "react";
 import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 
-export default function Client({ client, onDelete, onEdit }) {
-  function handleDelete(e) {
-    onDelete(client);
-    e.preventDefault();
+export default function DentistReview({ review, onDelete, onEdit }) {
+  function handleDelete(e){
+    onDelete(review)
+    e.preventDefault()
   }
   function handleEdit(e) {
-    onEdit(client);
-    e.preventDefault();
+    onEdit(review)
+    e.preventDefault()
   }
   return (
     <tr>
-      <td>{client.id}</td>
-      <td>{client.name}</td>
-      <td>{client.email}</td>
-      <td>{client.phone}</td>
+      <td>{review.id}</td>
+      <td>{review.rate}</td>
+      <td>{review.message}</td>
+      <td>{review.clientId}</td>
+      <td>{review.dentistId}</td>
       <td width="10%">
         <ButtonGroup>
           <Button variant="info" onClick={handleEdit}>

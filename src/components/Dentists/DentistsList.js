@@ -11,7 +11,6 @@ export default function DentistsList({ dentists, onDelete, onEdit }) {
           <th>Type</th>
           <th>Name</th>
           <th>Clinic Id</th>
-          <th>Clinic Name</th>
           <th>Actions</th>
         </tr>
       </thead>
